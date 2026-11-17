@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة تحكم المدير | Fresh Market</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Cairo', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+
+  <!-- Toast Banner -->
+  <div id="toast" class="hidden fixed bottom-5 left-5 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm transition-all"></div>
+
+  <!-- Login View -->
+  <div id="login-view" class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-emerald-900 via-emerald-800 to-green-950">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 border border-emerald-100">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl">🌿</div>
+        <h1 class="text-2xl font-extrabold text-emerald-950">لوحة تحكم مدير Fresh Market</h1>
+        <p class="text-slate-500 text-sm mt-1">تسجيل الدخول الآمن لإدارة الأسعار، الصور، المحافظ، والعروض لحظياً</p>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-1">البريد الإلكتروني للمدير</label>
+          <input id="login-email" type="email" required placeholder="saakkrrmm@gmail.com"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-1">كلمة المرور</label>
+          <input id="login-password" type="password" required placeholder="••••••••"
+            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+        </div>
+        <button type="submit"
+          class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-3 rounded-xl shadow transition">
+          تسجيل الدخول بالبريد وكلمة المرور
+        </button>
+      </form>
+
+      <div class="my-5 flex items-center gap-3">
+        <div class="flex-1 h-px bg-slate-200"></div>
+        <span class="text-xs text-slate-400">أو</span>
+        <div class="flex-1 h-px bg-slate-200"></div>
+      </div>
+
+      <button id="google-login-btn" type="button"
+        class="w-full border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition">
+        <span>تسجيل الدخول بحساب Google المعتمد</span>
+      </button>
+
+      <p id="login-error" class="hidden mt-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl p-3"></p>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard View -->
+  <div id="dashboard-view" class="hidden min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="w-72 bg-emerald-950 text-white flex flex-col justify-between shrink-0">
+      <div>
+        <div class="p-6 border-b border-emerald-900">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🌿</span>
+            <div>
+              <h2 class="font-extrabold text-lg leading-tight">Fresh Market</h2>
+              <span class="text-xs text-emerald-300">لوحة تحكم المدير اللحظية</span>
+            </div>
+          </div>
+        </div>
+        <nav class="p-4 space-y-2">
+          <button data-tab="products" class="nav-btn w-full text-right px-4 py-3 rounded-xl font-semibold bg-emerald-800 text-white flex items-center gap-3">
+            <span>🛍️</span><span>المنتجات والأسعار والصور</span>
+          </button>
+          <button data-tab="categories" class="nav-btn w-full text-right px-4 py-3 rounded-xl font-semibold text-emerald-100 hover:bg-emerald-900 flex items-center gap-3">
+            <span>📂</span><span>إدارة قاعدة الأصناف</span>
+          </button>
+          <button data-tab="offers" class="nav-btn w-full text-right px-4 py-3 rounded-xl font-semibold text-emerald-100 hover:bg-emerald-900 flex items-center gap-3">
+            <span>🏷️</span><span>قائمة العروض والبنرات</span>
+          </button>
+          <button data-tab="settings" class="nav-btn w-full text-right px-4 py-3 rounded-xl font-semibold text-emerald-100 hover:bg-emerald-900 flex items-center gap-3">
+            <span>💳</span><span>المحافظ والواتساب والسلة</span>
+          </button>
+          <button data-tab="security" class="nav-btn w-full text-right px-4 py-3 rounded-xl font-semibold text-emerald-100 hover:bg-emerald-900 flex items-center gap-3">
+            <span>🔐</span><span>الأمان وكلمة السر والجيميل</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="p-4 border-t border-emerald-900 space-y-3">
+        <div class="text-xs text-emerald-200 bg-emerald-900/60 rounded-xl p-3">
+          <div class="font-bold truncate" id="admin-email-label"></div>
+          <div class="text-[11px] text-emerald-300 truncate mt-1">UID: <span id="admin-uid-label"></span></div>
+        </div>
+        <button id="logout-btn" class="w-full py-2.5 rounded-xl bg-red-600/90 hover:bg-red-600 text-white font-bold text-sm transition">
+          تسجيل الخروج
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 overflow-y-auto">
+
+      <!-- TAB 1: PRODUCTS -->
+      <section id="tab-products" class="tab-panel space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">إدارة المنتجات، الأسعار، والصور</h1>
+            <p class="text-sm text-slate-500">أي تعديل هنا ينعكس فوراً في تطبيق الزبائن دون الحاجة لتحديث التطبيق.</p>
+          </div>
+          <div class="flex gap-3">
+            <button id="seed-data-btn" class="px-4 py-2.5 rounded-xl border border-emerald-600 text-emerald-700 hover:bg-emerald-50 font-bold text-sm">
+              تعبئة بيانات تجريبية أولية
+            </button>
+            <button id="open-product-modal-btn" class="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow">
+              + إضافة منتج جديد
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <table class="w-full text-right border-collapse">
+            <thead class="bg-slate-100 text-slate-600 text-xs uppercase">
+              <tr>
+                <th class="p-4">الصورة</th>
+                <th class="p-4">اسم المنتج</th>
+                <th class="p-4">الصنف</th>
+                <th class="p-4">السعر ($)</th>
+                <th class="p-4">الوحدة</th>
+                <th class="p-4">المخزون</th>
+                <th class="p-4">الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: CATEGORIES -->
+      <section id="tab-categories" class="tab-panel hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">التحكم في قاعدة الأصناف</h1>
+            <p class="text-sm text-slate-500">إضافة وتعديل أسماء وصور الأصناف التي تظهر في شاشة المتجر.</p>
+          </div>
+          <button id="open-category-modal-btn" class="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow">
+            + إضافة صنف جديد
+          </button>
+        </div>
+
+        <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+      </section>
+
+      <!-- TAB 3: OFFERS -->
+      <section id="tab-offers" class="tab-panel hidden space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900">التحكم في قائمة العروض</h1>
+            <p class="text-sm text-slate-500">إضافة وإزالة صور ووصف وأسعار العروض الترويجية لحظياً.</p>
+          </div>
+          <button id="open-offer-modal-btn" class="px-5 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm shadow">
+            + إضافة عرض جديد
+          </button>
+        </div>
+
+        <div id="offers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </section>
+
+      <!-- TAB 4: WALLETS, WHATSAPP, GMAIL & CART EXTRA CHANNELS -->
+      <section id="tab-settings" class="tab-panel hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900">المحافظ الإلكترونية، الواتساب، والقائمة الإضافية للسلة</h1>
+          <p class="text-sm text-slate-500">تحديث أرقام المحافظ وحساب الواتساب والجيميل وقائمة التواصل الإضافية بجانب الواتساب في سلة التسوق.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Contact & Gmail Card -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <h3 class="font-bold text-lg text-emerald-900">بيانات التواصل الأساسية للطلبات</h3>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">رقم واتساب استقبال الطلبات (مع مفتاح الدولة)</label>
+              <input id="setting-whatsapp" type="text" placeholder="+967771234567"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">حساب الجيميل للمتجر (قابل للتغيير متى شئت)</label>
+              <input id="setting-gmail" type="email" placeholder="saakkrrmm@gmail.com"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none" />
+            </div>
+          </div>
+
+          <!-- Wallets Card -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-lg text-emerald-900">أرقام حسابات المحافظ الإلكترونية</h3>
+              <button id="add-wallet-row-btn" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-200">+ إضافة محفظة</button>
+            </div>
+            <div id="wallets-list" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Extra Cart Channels Card -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-lg text-emerald-900">القائمة الإضافية بجانب الواتساب في سلة التسوق</h3>
+              <p class="text-xs text-slate-500">مثل: رقم الاتصال المباشر، تيليجرام، نقطة استلام، أو أي وسيلة تواصل إضافية للزبون.</p>
+            </div>
+            <button id="add-channel-row-btn" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-3 py-1.5 rounded-lg hover:bg-emerald-200">+ إضافة قناة</button>
+          </div>
+          <div id="channels-list" class="space-y-3"></div>
+        </div>
+
+        <div class="flex justify-end">
+          <button id="save-settings-btn" class="px-8 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold shadow-md">
+            حفظ كافة إعدادات المحافظ والقنوات الآن
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 5: SECURITY -->
+      <section id="tab-security" class="tab-panel hidden space-y-6">
+        <div>
+          <h1 class="text-2xl font-extrabold text-slate-900">الأمان، تغيير كلمة السر، وتغيير حساب الجيميل للمدير</h1>
+          <p class="text-sm text-slate-500">تحديث بيانات دخول المدير في Firebase Authentication وحفظ التغييرات.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Change Password -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <h3 class="font-bold text-lg text-emerald-900">تغيير كلمة السر للمدير</h3>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">كلمة المرور الحالية</label>
+              <input id="sec-current-pass" type="password" placeholder="••••••••"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">كلمة المرور الجديدة (6 أحرف على الأقل)</label>
+              <input id="sec-new-pass" type="password" placeholder="••••••••"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <button id="change-password-btn" class="w-full py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold">
+              حفظ كلمة السر الجديدة
+            </button>
+          </div>
+
+          <!-- Change Admin Email / Gmail -->
+          <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-4">
+            <h3 class="font-bold text-lg text-emerald-900">تغيير حساب الجيميل للدخول (Auth Email)</h3>
+            <p class="text-xs text-slate-500">سيتم إرسال رابط تأكيد إلى البريد الجديد لتفعيل الدخول به مع بقاء الصلاحيات محمية.</p>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">كلمة المرور الحالية للتأكيد</label>
+              <input id="sec-email-pass" type="password" placeholder="••••••••"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-slate-700 mb-1">البريد الإلكتروني الجديد (Gmail)</label>
+              <input id="sec-new-email" type="email" placeholder="newadmin@gmail.com"
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <button id="change-email-btn" class="w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold">
+              تحديث بريد الدخول وإرسال التحقق
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Product Modal -->
+  <div id="product-modal" class="hidden fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 max-h-[90vh] overflow-y-auto space-y-4">
+      <h2 id="product-modal-title" class="text-xl font-extrabold text-emerald-950">إضافة منتج</h2>
+      <input type="hidden" id="prod-id" />
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-bold text-slate-600">اسم المنتج</label>
+          <input id="prod-name" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">الصنف</label>
+          <input id="prod-category" type="text" placeholder="Fruits" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">السعر ($)</label>
+          <input id="prod-price" type="number" step="0.01" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">الوحدة</label>
+          <input id="prod-unit" type="text" placeholder="per kg" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">المخزون</label>
+          <input id="prod-stock" type="number" value="50" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div class="flex items-center gap-2 pt-5">
+          <input id="prod-organic" type="checkbox" class="w-4 h-4 accent-emerald-600" />
+          <label for="prod-organic" class="text-sm font-bold text-slate-700">منتج عضوي (Organic)</label>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-600">صورة المنتج (رفع من الاستديو أو رابط URL)</label>
+        <div class="flex items-center gap-3 mt-1">
+          <input id="prod-image-file" type="file" accept="image/*" class="text-xs" />
+          <img id="prod-image-preview" class="w-16 h-16 rounded-xl object-cover border hidden" />
+        </div>
+        <input id="prod-image-url" type="text" placeholder="أو الصق رابط الصورة المباشر هنا https://..." class="w-full mt-2 px-3 py-2 rounded-xl border border-slate-200 text-xs" />
+      </div>
+
+      <div>
+        <label class="text-xs font-bold text-slate-600">الوصف</label>
+        <textarea id="prod-desc" rows="2" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200"></textarea>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-600">القيمة الغذائية (اختياري)</label>
+        <input id="prod-nutrition" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button id="close-product-modal-btn" class="px-4 py-2 rounded-xl border border-slate-300 font-bold text-sm">إلغاء</button>
+        <button id="save-product-btn" class="px-6 py-2 rounded-xl bg-emerald-700 text-white font-bold text-sm">حفظ المنتج</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Modal -->
+  <div id="category-modal" class="hidden fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-4">
+      <h2 id="category-modal-title" class="text-xl font-extrabold text-emerald-950">إضافة صنف</h2>
+      <input type="hidden" id="cat-id" />
+      <div>
+        <label class="text-xs font-bold text-slate-600">اسم الصنف</label>
+        <input id="cat-name" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-600">ترتيب العرض</label>
+        <input id="cat-order" type="number" value="1" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-600">صورة الصنف (من الاستديو أو رابط)</label>
+        <div class="flex items-center gap-3 mt-1">
+          <input id="cat-image-file" type="file" accept="image/*" class="text-xs" />
+          <img id="cat-image-preview" class="w-14 h-14 rounded-xl object-cover border hidden" />
+        </div>
+        <input id="cat-image-url" type="text" placeholder="https://..." class="w-full mt-2 px-3 py-2 rounded-xl border border-slate-200 text-xs" />
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button id="close-category-modal-btn" class="px-4 py-2 rounded-xl border border-slate-300 font-bold text-sm">إلغاء</button>
+        <button id="save-category-btn" class="px-6 py-2 rounded-xl bg-emerald-700 text-white font-bold text-sm">حفظ الصنف</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Offer Modal -->
+  <div id="offer-modal" class="hidden fixed inset-0 z-40 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4">
+      <h2 id="offer-modal-title" class="text-xl font-extrabold text-emerald-950">إضافة عرض</h2>
+      <input type="hidden" id="offer-id" />
+      <div>
+        <label class="text-xs font-bold text-slate-600">عنوان العرض</label>
+        <input id="offer-title" type="text" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-600">وصف العرض</label>
+        <textarea id="offer-desc" rows="2" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200"></textarea>
+      </div>
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs font-bold text-slate-600">سعر العرض ($)</label>
+          <input id="offer-price" type="number" step="0.01" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">السعر السابق</label>
+          <input id="offer-orig-price" type="number" step="0.01" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+        <div>
+          <label class="text-xs font-bold text-slate-600">شارة الخصم</label>
+          <input id="offer-badge" type="text" placeholder="20% OFF" class="w-full mt-1 px-3 py-2 rounded-xl border border-slate-200" />
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-bold text-slate-600">صورة العرض (من الاستديو أو رابط)</label>
+        <div class="flex items-center gap-3 mt-1">
+          <input id="offer-image-file" type="file" accept="image/*" class="text-xs" />
+          <img id="offer-image-preview" class="w-16 h-12 rounded-xl object-cover border hidden" />
+        </div>
+        <input id="offer-image-url" type="text" placeholder="https://..." class="w-full mt-2 px-3 py-2 rounded-xl border border-slate-200 text-xs" />
+      </div>
+      <div class="flex items-center gap-2">
+        <input id="offer-active" type="checkbox" checked class="w-4 h-4 accent-emerald-600" />
+        <label for="offer-active" class="text-sm font-bold text-slate-700">تفعيل العرض للزبائن</label>
+      </div>
+      <div class="flex justify-end gap-3 pt-2">
+        <button id="close-offer-modal-btn" class="px-4 py-2 rounded-xl border border-slate-300 font-bold text-sm">إلغاء</button>
+        <button id="save-offer-btn" class="px-6 py-2 rounded-xl bg-emerald-700 text-white font-bold text-sm">حفظ العرض</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Modular SDK v11 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js";
+    import {
+      getAuth, onAuthStateChanged, signInWithEmailAndPassword, signInWithPopup,
+      GoogleAuthProvider, signOut, updatePassword, verifyBeforeUpdateEmail,
+      reauthenticateWithCredential, EmailAuthProvider
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-auth.js";
+    import {
+      getFirestore, collection, doc, getDoc, onSnapshot, addDoc, setDoc, updateDoc,
+      deleteDoc, serverTimestamp, query, orderBy
+    } from "https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCfLeX9HW9xFKVqE0p3CgwwLd62jwZonWc",
+      authDomain: "gen-lang-client-0394165080.firebaseapp.com",
+      projectId: "gen-lang-client-0394165080",
+      storageBucket: "gen-lang-client-0394165080.firebasestorage.app",
+      messagingSenderId: "477464210382",
+      appId: "1:477464210382:android:2660688b0c472ebe07d99f"
+    };
+
+    const NAMED_DATABASE_ID = "ai-studio-android-freshmar-30604e8d-648b-4a68-8ec1-d1c50045059b";
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app, NAMED_DATABASE_ID);
+
+    // Helpers
+    function showToast(msg, isError = false) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.className = `fixed bottom-5 left-5 z-50 px-5 py-3 rounded-xl shadow-lg text-white font-semibold text-sm ${isError ? "bg-red-600" : "bg-emerald-700"}`;
+      el.classList.remove("hidden");
+      setTimeout(() => el.classList.add("hidden"), 4000);
+    }
+
+    // Compress uploaded studio image to lightweight Data URI (<300k chars) so it complies with Firestore limits
+    function compressImageFile(file, maxWidth = 640, quality = 0.72) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = Math.min(maxWidth, img.width);
+            let q = quality;
+            let result = "";
+            for (let attempt = 0; attempt < 4; attempt++) {
+              const scale = Math.min(1, width / img.width);
+              const canvas = document.createElement("canvas");
+              canvas.width = Math.max(1, Math.round(img.width * scale));
+              canvas.height = Math.max(1, Math.round(img.height * scale));
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              result = canvas.toDataURL("image/jpeg", q);
+              if (result.length <= 320000) break;
+              width = Math.round(width * 0.75);
+              q = Math.max(0.4, q - 0.12);
+            }
+            resolve(result);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function wireImagePicker(fileInputId, urlInputId, previewId) {
+      const fileEl = document.getElementById(fileInputId);
+      const urlEl = document.getElementById(urlInputId);
+      const prevEl = document.getElementById(previewId);
+
+      fileEl.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        try {
+          const dataUri = await compressImageFile(file);
+          urlEl.value = dataUri;
+          prevEl.src = dataUri;
+          prevEl.classList.remove("hidden");
+          showToast("تم تجهيز وضغط الصورة من الاستديو بنجاح");
+        } catch (err) {
+          showToast("فشل قراءة الصورة: " + err.message, true);
+        }
+      });
+
+      urlEl.addEventListener("input", () => {
+        if (urlEl.value.trim()) {
+          prevEl.src = urlEl.value.trim();
+          prevEl.classList.remove("hidden");
+        } else {
+          prevEl.classList.add("hidden");
+        }
+      });
+    }
+
+    wireImagePicker("prod-image-file", "prod-image-url", "prod-image-preview");
+    wireImagePicker("cat-image-file", "cat-image-url", "cat-image-preview");
+    wireImagePicker("offer-image-file", "offer-image-url", "offer-image-preview");
+
+    // Auth Listeners
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const errEl = document.getElementById("login-error");
+      errEl.classList.add("hidden");
+      try {
+        const email = document.getElementById("login-email").value.trim();
+        const pass = document.getElementById("login-password").value;
+        await signInWithEmailAndPassword(auth, email, pass);
+      } catch (err) {
+        errEl.textContent = "خطأ في تسجيل الدخول: " + err.message;
+        errEl.classList.remove("hidden");
+      }
+    });
+
+    document.getElementById("google-login-btn").addEventListener("click", async () => {
+      const errEl = document.getElementById("login-error");
+      errEl.classList.add("hidden");
+      try {
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (err) {
+        errEl.textContent = "فشل دخول Google: " + err.message;
+        errEl.classList.remove("hidden");
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth));
+
+    // Tabs Switching
+    document.querySelectorAll(".nav-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".nav-btn").forEach((b) => b.classList.remove("bg-emerald-800", "text-white"));
+        btn.classList.add("bg-emerald-800", "text-white");
+        const target = btn.dataset.tab;
+        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.add("hidden"));
+        document.getElementById(`tab-${target}`).classList.remove("hidden");
+      });
+    });
+
+    let unsubscribers = [];
+    let currentProducts = [];
+    let currentCategories = [];
+    let currentOffers = [];
+    let walletsData = [];
+    let channelsData = [];
+
+    onAuthStateChanged(auth, async (user) => {
+      unsubscribers.forEach((u) => u());
+      unsubscribers = [];
+
+      if (!user) {
+        document.getElementById("login-view").classList.remove("hidden");
+        document.getElementById("dashboard-view").classList.add("hidden");
+        return;
+      }
+
+      document.getElementById("login-view").classList.add("hidden");
+      document.getElementById("dashboard-view").classList.remove("hidden");
+      document.getElementById("admin-email-label").textContent = user.email || "Admin";
+      document.getElementById("admin-uid-label").textContent = user.uid;
+
+      // Ensure verified bootstrap admin UID is registered in /admins/{uid} so email rotation stays authorized
+      if (user.email === "saakkrrmm@gmail.com" && user.emailVerified) {
+        try {
+          const adminDoc = await getDoc(doc(db, "admins", user.uid));
+          if (!adminDoc.exists()) {
+            await setDoc(doc(db, "admins", user.uid), {
+              email: user.email,
+              createdAt: serverTimestamp()
+            });
+          }
+        } catch (_) {}
+      }
+
+      startRealtimeListeners();
+    });
+
+    function startRealtimeListeners() {
+      // 1. Products
+      unsubscribers.push(
+        onSnapshot(collection(db, "products"), (snap) => {
+          currentProducts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          renderProducts();
+        }, (err) => showToast("خطأ في قراءة المنتجات: " + err.message, true))
+      );
+
+      // 2. Categories
+      unsubscribers.push(
+        onSnapshot(query(collection(db, "categories"), orderBy("sortOrder", "asc")), (snap) => {
+          currentCategories = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          renderCategories();
+        }, (err) => showToast("خطأ في قراءة الأصناف: " + err.message, true))
+      );
+
+      // 3. Offers
+      unsubscribers.push(
+        onSnapshot(collection(db, "offers"), (snap) => {
+          currentOffers = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+          renderOffers();
+        }, (err) => showToast("خطأ في قراءة العروض: " + err.message, true))
+      );
+
+      // 4. Settings (Wallets, WhatsApp, Gmail, Extra Channels)
+      unsubscribers.push(
+        onSnapshot(doc(db, "settings", "app_config"), (snap) => {
+          const data = snap.exists() ? snap.data() : {};
+          document.getElementById("setting-whatsapp").value = data.adminWhatsApp || "";
+          document.getElementById("setting-gmail").value = data.adminGmail || "";
+          walletsData = Array.isArray(data.wallets) ? data.wallets : [];
+          channelsData = Array.isArray(data.extraCartChannels) ? data.extraCartChannels : [];
+          renderWallets();
+          renderChannels();
+        }, (err) => showToast("خطأ في قراءة الإعدادات: " + err.message, true))
+      );
+    }
+
+    // Render Products Table with Quick Price Edit
+    function renderProducts() {
+      const tbody = document.getElementById("products-tbody");
+      tbody.innerHTML = currentProducts.map((p) => `
+        <tr class="hover:bg-slate-50">
+          <td class="p-3">
+            <img src="${p.imageUrl || 'https://placehold.co/80x80?text=Fresh'}" class="w-14 h-14 rounded-xl object-cover border" />
+          </td>
+          <td class="p-3 font-bold text-slate-900">${p.name || ""}</td>
+          <td class="p-3 text-slate-600">${p.category || ""}</td>
+          <td class="p-3">
+            <div class="flex items-center gap-1">
+              <input type="number" step="0.01" value="${p.price ?? 0}" id="quick-price-${p.id}"
+                class="w-24 px-2 py-1 rounded-lg border border-slate-300 text-sm font-bold text-emerald-700" />
+              <button onclick="window.quickUpdatePrice('${p.id}')" class="text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded-lg font-bold hover:bg-emerald-200">حفظ</button>
+            </div>
+          </td>
+          <td class="p-3 text-slate-600">${p.unit || ""}</td>
+          <td class="p-3 text-slate-600">${p.stockQuantity ?? 0}</td>
+          <td class="p-3 space-x-2 space-x-reverse">
+            <button onclick="window.editProduct('${p.id}')" class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold hover:bg-blue-100">تعديل</button>
+            <button onclick="window.deleteProduct('${p.id}')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold hover:bg-red-100">حذف</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    window.quickUpdatePrice = async (id) => {
+      const val = parseFloat(document.getElementById(`quick-price-${id}`).value);
+      if (isNaN(val) || val < 0) return showToast("أدخل سعراً صحيحاً", true);
+      try {
+        await updateDoc(doc(db, "products", id), { price: val, updatedAt: serverTimestamp() });
+        showToast("تم تحديث السعر فوراً في تطبيق الزبائن");
+      } catch (err) {
+        showToast("فشل التحديث (تحقق من صلاحية المدير): " + err.message, true);
+      }
+    };
+
+    window.editProduct = (id) => {
+      const p = currentProducts.find((x) => x.id === id);
+      if (!p) return;
+      document.getElementById("product-modal-title").textContent = "تعديل المنتج";
+      document.getElementById("prod-id").value = p.id;
+      document.getElementById("prod-name").value = p.name || "";
+      document.getElementById("prod-category").value = p.category || "";
+      document.getElementById("prod-price").value = p.price ?? 0;
+      document.getElementById("prod-unit").value = p.unit || "";
+      document.getElementById("prod-stock").value = p.stockQuantity ?? 0;
+      document.getElementById("prod-organic").checked = !!p.organic;
+      document.getElementById("prod-image-url").value = p.imageUrl || "";
+      document.getElementById("prod-desc").value = p.description || "";
+      document.getElementById("prod-nutrition").value = p.nutritionInfo || "";
+      const prev = document.getElementById("prod-image-preview");
+      if (p.imageUrl) { prev.src = p.imageUrl; prev.classList.remove("hidden"); } else { prev.classList.add("hidden"); }
+      document.getElementById("product-modal").classList.remove("hidden");
+    };
+
+    window.deleteProduct = async (id) => {
+      if (!confirm("هل تريد حذف هذا المنتج نهائياً؟")) return;
+      try {
+        await deleteDoc(doc(db, "products", id));
+        showToast("تم حذف المنتج بنجاح");
+      } catch (err) {
+        showToast("فشل الحذف: " + err.message, true);
+      }
+    };
+
+    document.getElementById("open-product-modal-btn").addEventListener("click", () => {
+      document.getElementById("product-modal-title").textContent = "إضافة منتج جديد";
+      document.getElementById("prod-id").value = "";
+      document.getElementById("prod-name").value = "";
+      document.getElementById("prod-category").value = "";
+      document.getElementById("prod-price").value = "";
+      document.getElementById("prod-unit").value = "";
+      document.getElementById("prod-stock").value = "50";
+      document.getElementById("prod-organic").checked = true;
+      document.getElementById("prod-image-url").value = "";
+      document.getElementById("prod-desc").value = "";
+      document.getElementById("prod-nutrition").value = "";
+      document.getElementById("prod-image-preview").classList.add("hidden");
+      document.getElementById("product-modal").classList.remove("hidden");
+    });
+
+    document.getElementById("close-product-modal-btn").addEventListener("click", () => {
+      document.getElementById("product-modal").classList.add("hidden");
+    });
+
+    document.getElementById("save-product-btn").addEventListener("click", async () => {
+      const id = document.getElementById("prod-id").value;
+      const name = document.getElementById("prod-name").value.trim();
+      const category = document.getElementById("prod-category").value.trim();
+      const unit = document.getElementById("prod-unit").value.trim();
+      if (!name || !category || !unit) {
+        return showToast("يرجى إدخال اسم المنتج والصنف والوحدة", true);
+      }
+      const existingProd = id ? currentProducts.find((x) => x.id === id) : null;
+      const payload = {
+        name,
+        category,
+        price: parseFloat(document.getElementById("prod-price").value) || 0,
+        unit,
+        stockQuantity: parseInt(document.getElementById("prod-stock").value, 10) || 0,
+        organic: document.getElementById("prod-organic").checked,
+        imageUrl: document.getElementById("prod-image-url").value.trim(),
+        description: document.getElementById("prod-desc").value.trim(),
+        nutritionInfo: document.getElementById("prod-nutrition").value.trim(),
+        rating: existingProd?.rating ?? 4.8,
+        reviewCount: existingProd?.reviewCount ?? 25,
+        updatedAt: serverTimestamp()
+      };
+      try {
+        if (id) {
+          await updateDoc(doc(db, "products", id), payload);
+        } else {
+          payload.createdAt = serverTimestamp();
+          await addDoc(collection(db, "products"), payload);
+        }
+        document.getElementById("product-modal").classList.add("hidden");
+        showToast("تم حفظ المنتج ومزامنته لحظياً");
+      } catch (err) {
+        showToast("فشل الحفظ: " + err.message, true);
+      }
+    });
+
+    // Categories CRUD
+    function renderCategories() {
+      const grid = document.getElementById("categories-grid");
+      grid.innerHTML = currentCategories.map((c) => `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <img src="${c.imageUrl || 'https://placehold.co/64x64?text=Cat'}" class="w-14 h-14 rounded-xl object-cover border" />
+            <div>
+              <h4 class="font-bold text-slate-900">${c.name}</h4>
+              <span class="text-xs text-slate-400">ترتيب: ${c.sortOrder ?? 0}</span>
+            </div>
+          </div>
+          <div class="flex gap-2 justify-end">
+            <button onclick="window.editCategory('${c.id}')" class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold">تعديل</button>
+            <button onclick="window.deleteCategory('${c.id}')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">حذف</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("open-category-modal-btn").addEventListener("click", () => {
+      document.getElementById("cat-id").value = "";
+      document.getElementById("cat-name").value = "";
+      document.getElementById("cat-order").value = currentCategories.length + 1;
+      document.getElementById("cat-image-url").value = "";
+      document.getElementById("cat-image-preview").classList.add("hidden");
+      document.getElementById("category-modal").classList.remove("hidden");
+    });
+
+    document.getElementById("close-category-modal-btn").addEventListener("click", () => {
+      document.getElementById("category-modal").classList.add("hidden");
+    });
+
+    window.editCategory = (id) => {
+      const c = currentCategories.find((x) => x.id === id);
+      if (!c) return;
+      document.getElementById("cat-id").value = c.id;
+      document.getElementById("cat-name").value = c.name || "";
+      document.getElementById("cat-order").value = c.sortOrder ?? 0;
+      document.getElementById("cat-image-url").value = c.imageUrl || "";
+      const prev = document.getElementById("cat-image-preview");
+      if (c.imageUrl) { prev.src = c.imageUrl; prev.classList.remove("hidden"); } else { prev.classList.add("hidden"); }
+      document.getElementById("category-modal").classList.remove("hidden");
+    };
+
+    window.deleteCategory = async (id) => {
+      if (!confirm("حذف الصنف؟")) return;
+      try {
+        await deleteDoc(doc(db, "categories", id));
+        showToast("تم حذف الصنف");
+      } catch (err) {
+        showToast("فشل الحذف: " + err.message, true);
+      }
+    };
+
+    document.getElementById("save-category-btn").addEventListener("click", async () => {
+      const id = document.getElementById("cat-id").value;
+      const name = document.getElementById("cat-name").value.trim();
+      if (!name) return showToast("يرجى إدخال اسم الصنف", true);
+      const payload = {
+        name,
+        sortOrder: parseInt(document.getElementById("cat-order").value, 10) || 0,
+        imageUrl: document.getElementById("cat-image-url").value.trim(),
+        updatedAt: serverTimestamp()
+      };
+      try {
+        if (id) {
+          await updateDoc(doc(db, "categories", id), payload);
+        } else {
+          payload.createdAt = serverTimestamp();
+          await addDoc(collection(db, "categories"), payload);
+        }
+        document.getElementById("category-modal").classList.add("hidden");
+        showToast("تم حفظ الصنف ومزامنته");
+      } catch (err) {
+        showToast("فشل الحفظ: " + err.message, true);
+      }
+    });
+
+    // Offers CRUD
+    function renderOffers() {
+      const grid = document.getElementById("offers-grid");
+      grid.innerHTML = currentOffers.map((o) => `
+        <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col">
+          <img src="${o.imageUrl || 'https://placehold.co/400x180?text=Offer'}" class="w-full h-40 object-cover" />
+          <div class="p-4 flex-1 flex flex-col justify-between gap-3">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold px-2 py-0.5 rounded-full ${o.active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">${o.active ? 'نشط' : 'متوقف'}</span>
+                <span class="text-xs font-bold text-orange-600">${o.discountLabel || ''}</span>
+              </div>
+              <h4 class="font-bold text-slate-900 mt-2">${o.title}</h4>
+              <p class="text-xs text-slate-500 mt-1">${o.description || ''}</p>
+              <div class="mt-2 font-extrabold text-emerald-700">$${o.price}</div>
+            </div>
+            <div class="flex gap-2 justify-end pt-2 border-t">
+              <button onclick="window.editOffer('${o.id}')" class="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-bold">تعديل</button>
+              <button onclick="window.deleteOffer('${o.id}')" class="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg font-bold">حذف</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    document.getElementById("open-offer-modal-btn").addEventListener("click", () => {
+      document.getElementById("offer-id").value = "";
+      document.getElementById("offer-title").value = "";
+      document.getElementById("offer-desc").value = "";
+      document.getElementById("offer-price").value = "";
+      document.getElementById("offer-orig-price").value = "";
+      document.getElementById("offer-badge").value = "";
+      document.getElementById("offer-image-url").value = "";
+      document.getElementById("offer-active").checked = true;
+      document.getElementById("offer-image-preview").classList.add("hidden");
+      document.getElementById("offer-modal").classList.remove("hidden");
+    });
+
+    document.getElementById("close-offer-modal-btn").addEventListener("click", () => {
+      document.getElementById("offer-modal").classList.add("hidden");
+    });
+
+    window.editOffer = (id) => {
+      const o = currentOffers.find((x) => x.id === id);
+      if (!o) return;
+      document.getElementById("offer-id").value = o.id;
+      document.getElementById("offer-title").value = o.title || "";
+      document.getElementById("offer-desc").value = o.description || "";
+      document.getElementById("offer-price").value = o.price ?? 0;
+      document.getElementById("offer-orig-price").value = o.originalPrice ?? "";
+      document.getElementById("offer-badge").value = o.discountLabel || "";
+      document.getElementById("offer-image-url").value = o.imageUrl || "";
+      document.getElementById("offer-active").checked = !!o.active;
+      const prev = document.getElementById("offer-image-preview");
+      if (o.imageUrl) { prev.src = o.imageUrl; prev.classList.remove("hidden"); } else { prev.classList.add("hidden"); }
+      document.getElementById("offer-modal").classList.remove("hidden");
+    };
+
+    window.deleteOffer = async (id) => {
+      if (!confirm("حذف العرض؟")) return;
+      try {
+        await deleteDoc(doc(db, "offers", id));
+        showToast("تم حذف العرض");
+      } catch (err) {
+        showToast("فشل الحذف: " + err.message, true);
+      }
+    };
+
+    document.getElementById("save-offer-btn").addEventListener("click", async () => {
+      const id = document.getElementById("offer-id").value;
+      const title = document.getElementById("offer-title").value.trim();
+      if (!title) return showToast("يرجى إدخال عنوان العرض", true);
+      const origPrice = parseFloat(document.getElementById("offer-orig-price").value);
+      const payload = {
+        title,
+        description: document.getElementById("offer-desc").value.trim(),
+        price: parseFloat(document.getElementById("offer-price").value) || 0,
+        discountLabel: document.getElementById("offer-badge").value.trim(),
+        imageUrl: document.getElementById("offer-image-url").value.trim(),
+        active: document.getElementById("offer-active").checked,
+        updatedAt: serverTimestamp()
+      };
+      if (!isNaN(origPrice)) payload.originalPrice = origPrice;
+      try {
+        if (id) {
+          await updateDoc(doc(db, "offers", id), payload);
+        } else {
+          payload.createdAt = serverTimestamp();
+          await addDoc(collection(db, "offers"), payload);
+        }
+        document.getElementById("offer-modal").classList.add("hidden");
+        showToast("تم حفظ العرض ومزامنته");
+      } catch (err) {
+        showToast("فشل الحفظ: " + err.message, true);
+      }
+    });
+
+    // Wallets & Extra Cart Channels
+    function renderWallets() {
+      const container = document.getElementById("wallets-list");
+      container.innerHTML = walletsData.map((w, idx) => `
+        <div class="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <input type="text" placeholder="اسم المحفظة" value="${w.name || ''}" onchange="window.updateWallet(${idx}, 'name', this.value)"
+            class="col-span-4 px-2.5 py-1.5 rounded-lg border text-xs font-bold" />
+          <input type="text" placeholder="رقم الحساب" value="${w.accountNumber || ''}" onchange="window.updateWallet(${idx}, 'accountNumber', this.value)"
+            class="col-span-4 px-2.5 py-1.5 rounded-lg border text-xs" />
+          <input type="text" placeholder="ملاحظة" value="${w.note || ''}" onchange="window.updateWallet(${idx}, 'note', this.value)"
+            class="col-span-3 px-2.5 py-1.5 rounded-lg border text-xs" />
+          <button onclick="window.removeWallet(${idx})" class="col-span-1 text-red-600 font-bold text-sm">✕</button>
+        </div>
+      `).join("");
+    }
+
+    window.updateWallet = (idx, key, val) => { walletsData[idx][key] = val; };
+    window.removeWallet = (idx) => { walletsData.splice(idx, 1); renderWallets(); };
+    document.getElementById("add-wallet-row-btn").addEventListener("click", () => {
+      walletsData.push({ name: "", accountNumber: "", note: "" });
+      renderWallets();
+    });
+
+    function renderChannels() {
+      const container = document.getElementById("channels-list");
+      container.innerHTML = channelsData.map((ch, idx) => `
+        <div class="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <input type="text" placeholder="اسم القناة (مثال: تيليجرام / اتصال)" value="${ch.label || ''}" onchange="window.updateChannel(${idx}, 'label', this.value)"
+            class="col-span-5 px-2.5 py-1.5 rounded-lg border text-xs font-bold" />
+          <input type="text" placeholder="الرقم أو المعرف" value="${ch.value || ''}" onchange="window.updateChannel(${idx}, 'value', this.value)"
+            class="col-span-6 px-2.5 py-1.5 rounded-lg border text-xs" />
+          <button onclick="window.removeChannel(${idx})" class="col-span-1 text-red-600 font-bold text-sm">✕</button>
+        </div>
+      `).join("");
+    }
+
+    window.updateChannel = (idx, key, val) => { channelsData[idx][key] = val; };
+    window.removeChannel = (idx) => { channelsData.splice(idx, 1); renderChannels(); };
+    document.getElementById("add-channel-row-btn").addEventListener("click", () => {
+      channelsData.push({ label: "", value: "" });
+      renderChannels();
+    });
+
+    document.getElementById("save-settings-btn").addEventListener("click", async () => {
+      try {
+        await setDoc(doc(db, "settings", "app_config"), {
+          adminWhatsApp: document.getElementById("setting-whatsapp").value.trim(),
+          adminGmail: document.getElementById("setting-gmail").value.trim(),
+          wallets: walletsData.filter((w) => w.name && w.accountNumber),
+          extraCartChannels: channelsData.filter((c) => c.label && c.value),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+        showToast("تم حفظ المحافظ وقنوات السلة وانعكست فوراً لدى الزبائن!");
+      } catch (err) {
+        showToast("فشل حفظ الإعدادات: " + err.message, true);
+      }
+    });
+
+    // Security: Change Password & Email
+    document.getElementById("change-password-btn").addEventListener("click", async () => {
+      const currentPass = document.getElementById("sec-current-pass").value;
+      const newPass = document.getElementById("sec-new-pass").value;
+      if (newPass.length < 6) return showToast("كلمة المرور يجب أن تكون 6 أحرف على الأقل", true);
+      try {
+        const user = auth.currentUser;
+        const cred = EmailAuthProvider.credential(user.email, currentPass);
+        await reauthenticateWithCredential(user, cred);
+        await updatePassword(user, newPass);
+        document.getElementById("sec-current-pass").value = "";
+        document.getElementById("sec-new-pass").value = "";
+        showToast("تم تغيير كلمة السر وحفظها بنجاح");
+      } catch (err) {
+        showToast("تعذر تغيير كلمة السر: " + err.message, true);
+      }
+    });
+
+    document.getElementById("change-email-btn").addEventListener("click", async () => {
+      const currentPass = document.getElementById("sec-email-pass").value;
+      const newEmail = document.getElementById("sec-new-email").value.trim();
+      if (!newEmail) return showToast("أدخل البريد الإلكتروني الجديد", true);
+      try {
+        const user = auth.currentUser;
+        const cred = EmailAuthProvider.credential(user.email, currentPass);
+        await reauthenticateWithCredential(user, cred);
+        await verifyBeforeUpdateEmail(user, newEmail);
+        showToast("تم إرسال رابط التأكيد إلى بريدك الجديد لتفعيل الدخول به");
+      } catch (err) {
+        showToast("تعذر تحديث البريد: " + err.message, true);
+      }
+    });
+
+    // Seed Starter Data
+    document.getElementById("seed-data-btn").addEventListener("click", async () => {
+      try {
+        await setDoc(doc(db, "settings", "app_config"), {
+          adminWhatsApp: "+967771234567",
+          adminGmail: "saakkrrmm@gmail.com",
+          wallets: [
+            { name: "محفظة الكريمي", accountNumber: "300112233", note: "تحويل فوري" },
+            { name: "جيب / جوالي", accountNumber: "770011223", note: "بدون رسوم" }
+          ],
+          extraCartChannels: [
+            { label: "اتصال مباشر", value: "770011223" },
+            { label: "تيليجرام الطلبات", value: "@FreshMarketOrder" }
+          ],
+          updatedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, "categories", "cat_fruits"), {
+          name: "Fruits", sortOrder: 1, imageUrl: "", createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, "categories", "cat_veg"), {
+          name: "Vegetables", sortOrder: 2, imageUrl: "", createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, "products", "prod_avocado"), {
+          name: "Organic Hass Avocados",
+          category: "Fruits",
+          price: 4.99,
+          unit: "pack of 4",
+          rating: 4.8,
+          reviewCount: 124,
+          imageUrl: "",
+          description: "Rich, creamy organic Hass avocados harvested at peak ripeness.",
+          organic: true,
+          nutritionInfo: "Calories: 160 kcal | Fiber: 7g",
+          stockQuantity: 45,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        await setDoc(doc(db, "offers", "offer_weekend"), {
+          title: "سلة التوفير العضوية",
+          description: "تشكيلة فواكه وخضروات طازجة بخصم خاص",
+          price: 14.99,
+          originalPrice: 19.99,
+          discountLabel: "25% OFF",
+          imageUrl: "",
+          active: true,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
+        showToast("تمت تعبئة البيانات الأولية بنجاح!");
+      } catch (err) {
+        showToast("فشل التعبئة: " + err.message, true);
+      }
+    });
+  </script>
+</body>
+</html>

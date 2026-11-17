@@ -1,0 +1,124 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Storefront grocery product managed by Admin and read in real-time by customers.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product display name" },
+        "category": { "type": "string", "description": "Category name" },
+        "price": { "type": "number", "description": "Current unit price" },
+        "unit": { "type": "string", "description": "Pricing unit (e.g. per kg, 500g)" },
+        "rating": { "type": "number", "description": "Average rating 0..5" },
+        "reviewCount": { "type": "integer", "description": "Review count" },
+        "imageUrl": { "type": "string", "description": "Product image URL or compressed Base64 data URI" },
+        "description": { "type": "string", "description": "Product description" },
+        "organic": { "type": "boolean", "description": "Whether the product is organic" },
+        "nutritionInfo": { "type": "string", "description": "Nutritional details" },
+        "stockQuantity": { "type": "integer", "description": "Available inventory count" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp via FieldValue.serverTimestamp()" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp via FieldValue.serverTimestamp()" }
+      },
+      "required": ["name", "category", "price", "unit", "organic", "stockQuantity", "createdAt", "updatedAt"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Store product category with editable name and image.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Category name" },
+        "imageUrl": { "type": "string", "description": "Category image URL or data URI" },
+        "sortOrder": { "type": "integer", "description": "Display order" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["name", "sortOrder", "createdAt", "updatedAt"]
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "Promotional offer banner with image, description, and offer price.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Offer headline" },
+        "description": { "type": "string", "description": "Offer details" },
+        "price": { "type": "number", "description": "Promotional price" },
+        "originalPrice": { "type": "number", "description": "Original price before discount" },
+        "discountLabel": { "type": "string", "description": "Badge text e.g. 20% OFF" },
+        "imageUrl": { "type": "string", "description": "Offer banner image URL or data URI" },
+        "active": { "type": "boolean", "description": "Whether offer is active" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["title", "description", "price", "active", "createdAt", "updatedAt"]
+    },
+    "AppSettings": {
+      "title": "AppSettings",
+      "description": "Storefront configuration including wallet numbers, WhatsApp order number, Gmail, and extra cart channels.",
+      "type": "object",
+      "properties": {
+        "adminWhatsApp": { "type": "string", "description": "Admin WhatsApp number for cart orders" },
+        "adminGmail": { "type": "string", "description": "Admin Gmail address" },
+        "wallets": { "type": "array", "description": "List of payment wallet objects {name, accountNumber, note}" },
+        "extraCartChannels": { "type": "array", "description": "Extra contact/order channels shown beside WhatsApp in cart {label, value}" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["adminWhatsApp", "adminGmail", "wallets", "extraCartChannels", "updatedAt"]
+    },
+    "CustomerOrder": {
+      "title": "CustomerOrder",
+      "description": "Order placed by an authenticated customer.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Owner Firebase Auth UID" },
+        "orderCode": { "type": "string", "description": "Human-readable order code" },
+        "customerName": { "type": "string", "description": "Customer display name" },
+        "deliveryAddress": { "type": "string", "description": "Delivery address" },
+        "deliveryTimeSlot": { "type": "string", "description": "Chosen delivery window" },
+        "paymentMethod": { "type": "string", "description": "Selected payment wallet or cash" },
+        "totalPrice": { "type": "number", "description": "Order total" },
+        "status": { "type": "string", "enum": ["CONFIRMED", "PACKED", "OUT_FOR_DELIVERY", "DELIVERED"] },
+        "itemsSummary": { "type": "string", "description": "Summary of ordered items" },
+        "itemCount": { "type": "integer", "description": "Total item count" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Server update timestamp" }
+      },
+      "required": ["userId", "orderCode", "deliveryAddress", "deliveryTimeSlot", "paymentMethod", "totalPrice", "status", "itemsSummary", "itemCount", "createdAt", "updatedAt"]
+    },
+    "FavoriteItem": {
+      "title": "FavoriteItem",
+      "description": "Customer favorite product reference.",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string", "description": "Favorited product document ID" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Server creation timestamp" }
+      },
+      "required": ["productId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Public read-only product catalog; Admin-only writes."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Public read-only product categories; Admin-only writes."
+    },
+    "/offers/{offerId}": {
+      "schema": { "$ref": "#/entities/Offer" },
+      "description": "Public read-only promotional offers; Admin-only writes."
+    },
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/AppSettings" },
+      "description": "Public read-only wallet accounts, WhatsApp, Gmail, and extra cart channels; Admin-only writes."
+    },
+    "/users/{userId}/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/CustomerOrder" },
+      "description": "Customer orders isolated per authenticated user."
+    },
+    "/users/{userId}/favorites/{productId}": {
+      "schema": { "$ref": "#/entities/FavoriteItem" },
+      "description": "Customer favorited products isolated per authenticated user."
+    }
+  }
+}

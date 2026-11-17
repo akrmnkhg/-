@@ -1,0 +1,252 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global safety net: default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admin verification: verified bootstrap admin email OR explicit entry in /admins/{uid}
+    function isAdmin() {
+      return isSignedIn() && (
+        ('email' in request.auth.token &&
+         request.auth.token.email == 'saakkrrmm@gmail.com' &&
+         'email_verified' in request.auth.token &&
+         request.auth.token.email_verified == true) ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+             data.category is string && data.category.size() >= 1 && data.category.size() <= 60 &&
+             data.price is number && data.price >= 0 && data.price <= 100000 &&
+             data.unit is string && data.unit.size() >= 1 && data.unit.size() <= 50 &&
+             data.organic is bool &&
+             data.stockQuantity is int && data.stockQuantity >= 0 && data.stockQuantity <= 1000000 &&
+             (!('rating' in data) || (data.rating is number && data.rating >= 0 && data.rating <= 5)) &&
+             (!('reviewCount' in data) || (data.reviewCount is int && data.reviewCount >= 0)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 350000)) &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 1000)) &&
+             (!('nutritionInfo' in data) || (data.nutritionInfo is string && data.nutritionInfo.size() <= 500)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidCategory(data) {
+      return data.name is string && data.name.size() >= 1 && data.name.size() <= 60 &&
+             data.sortOrder is int && data.sortOrder >= 0 && data.sortOrder <= 10000 &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 350000)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidOffer(data) {
+      return data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+             data.description is string && data.description.size() <= 1000 &&
+             data.price is number && data.price >= 0 && data.price <= 100000 &&
+             data.active is bool &&
+             (!('originalPrice' in data) || (data.originalPrice is number && data.originalPrice >= 0 && data.originalPrice <= 100000)) &&
+             (!('discountLabel' in data) || (data.discountLabel is string && data.discountLabel.size() <= 50)) &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 350000)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidAppSettings(data) {
+      return data.adminWhatsApp is string && data.adminWhatsApp.size() <= 40 &&
+             data.adminGmail is string && data.adminGmail.size() <= 120 &&
+             data.wallets is list && data.wallets.size() <= 20 &&
+             (data.wallets.size() == 0 || (
+               data.wallets[0] is map &&
+               data.wallets[0].name is string && data.wallets[0].name.size() <= 60 &&
+               data.wallets[0].accountNumber is string && data.wallets[0].accountNumber.size() <= 80
+             )) &&
+             data.extraCartChannels is list && data.extraCartChannels.size() <= 20 &&
+             (data.extraCartChannels.size() == 0 || (
+               data.extraCartChannels[0] is map &&
+               data.extraCartChannels[0].label is string && data.extraCartChannels[0].label.size() <= 60 &&
+               data.extraCartChannels[0].value is string && data.extraCartChannels[0].value.size() <= 120
+             )) &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidCustomerOrder(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.orderCode is string && data.orderCode.size() >= 1 && data.orderCode.size() <= 40 &&
+             (!('customerName' in data) || (data.customerName is string && data.customerName.size() <= 120)) &&
+             data.deliveryAddress is string && data.deliveryAddress.size() >= 1 && data.deliveryAddress.size() <= 300 &&
+             data.deliveryTimeSlot is string && data.deliveryTimeSlot.size() >= 1 && data.deliveryTimeSlot.size() <= 100 &&
+             data.paymentMethod is string && data.paymentMethod.size() >= 1 && data.paymentMethod.size() <= 100 &&
+             data.totalPrice is number && data.totalPrice >= 0 && data.totalPrice <= 1000000 &&
+             data.status in ['CONFIRMED', 'PACKED', 'OUT_FOR_DELIVERY', 'DELIVERED'] &&
+             data.itemsSummary is string && data.itemsSummary.size() >= 1 && data.itemsSummary.size() <= 2000 &&
+             data.itemCount is int && data.itemCount >= 1 && data.itemCount <= 1000 &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidFavoriteItem(data) {
+      return data.productId is string && data.productId.size() >= 1 && data.productId.size() <= 128 &&
+             data.createdAt is timestamp && data.createdAt <= request.time;
+    }
+
+    // Admins registry (read-only by self; verified bootstrap admin can self-register UID before changing email)
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && isValidId(adminUid) && request.auth.uid == adminUid;
+      allow create: if isSignedIn() &&
+                       isValidId(adminUid) &&
+                       request.auth.uid == adminUid &&
+                       'email' in request.auth.token &&
+                       request.auth.token.email == 'saakkrrmm@gmail.com' &&
+                       'email_verified' in request.auth.token &&
+                       request.auth.token.email_verified == true &&
+                       incoming().keys().hasAll(['email', 'createdAt']) &&
+                       incoming().keys().hasOnly(['email', 'createdAt']) &&
+                       incoming().email == request.auth.token.email &&
+                       incoming().createdAt is timestamp &&
+                       incoming().createdAt <= request.time;
+      allow list, update, delete: if false;
+    }
+
+    // Storefront Products: Read-only for customers, Admin-only writes
+    match /products/{productId} {
+      allow get: if isValidId(productId);
+      allow list: if true;
+
+      allow create: if isAdmin() &&
+                       isValidId(productId) &&
+                       incoming().keys().hasAll(['name', 'category', 'price', 'unit', 'organic', 'stockQuantity', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['name', 'category', 'price', 'unit', 'rating', 'reviewCount', 'imageUrl', 'description', 'organic', 'nutritionInfo', 'stockQuantity', 'createdAt', 'updatedAt']) &&
+                       isValidProduct(incoming());
+
+      allow update: if isAdmin() &&
+                       isValidId(productId) &&
+                       isValidProduct(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'category', 'price', 'unit', 'rating', 'reviewCount', 'imageUrl', 'description', 'organic', 'nutritionInfo', 'stockQuantity', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    // Storefront Categories: Read-only for customers, Admin-only writes
+    match /categories/{categoryId} {
+      allow get: if isValidId(categoryId);
+      allow list: if true;
+
+      allow create: if isAdmin() &&
+                       isValidId(categoryId) &&
+                       incoming().keys().hasAll(['name', 'sortOrder', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['name', 'imageUrl', 'sortOrder', 'createdAt', 'updatedAt']) &&
+                       isValidCategory(incoming());
+
+      allow update: if isAdmin() &&
+                       isValidId(categoryId) &&
+                       isValidCategory(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['name', 'imageUrl', 'sortOrder', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(categoryId);
+    }
+
+    // Storefront Offers: Read-only for customers, Admin-only writes
+    match /offers/{offerId} {
+      allow get: if isValidId(offerId);
+      allow list: if true;
+
+      allow create: if isAdmin() &&
+                       isValidId(offerId) &&
+                       incoming().keys().hasAll(['title', 'description', 'price', 'active', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['title', 'description', 'price', 'originalPrice', 'discountLabel', 'imageUrl', 'active', 'createdAt', 'updatedAt']) &&
+                       isValidOffer(incoming());
+
+      allow update: if isAdmin() &&
+                       isValidId(offerId) &&
+                       isValidOffer(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'price', 'originalPrice', 'discountLabel', 'imageUrl', 'active', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(offerId);
+    }
+
+    // Storefront Settings (Wallets, WhatsApp, Gmail, Extra Cart Channels): Read-only for customers, Admin-only writes
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId);
+      allow list: if true;
+
+      allow create: if isAdmin() &&
+                       isValidId(settingId) &&
+                       incoming().keys().hasAll(['adminWhatsApp', 'adminGmail', 'wallets', 'extraCartChannels', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['adminWhatsApp', 'adminGmail', 'wallets', 'extraCartChannels', 'updatedAt']) &&
+                       isValidAppSettings(incoming());
+
+      allow update: if isAdmin() &&
+                       isValidId(settingId) &&
+                       isValidAppSettings(incoming()) &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['adminWhatsApp', 'adminGmail', 'wallets', 'extraCartChannels', 'updatedAt']);
+
+      allow delete: if isAdmin() && isValidId(settingId);
+    }
+
+    // Customer Orders: Isolated per authenticated user
+    match /users/{userId}/orders/{orderId} {
+      allow get: if isSignedIn() && isValidId(userId) && isValidId(orderId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(orderId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll(['userId', 'orderCode', 'deliveryAddress', 'deliveryTimeSlot', 'paymentMethod', 'totalPrice', 'status', 'itemsSummary', 'itemCount', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'orderCode', 'customerName', 'deliveryAddress', 'deliveryTimeSlot', 'paymentMethod', 'totalPrice', 'status', 'itemsSummary', 'itemCount', 'createdAt', 'updatedAt']) &&
+                       incoming().status == 'CONFIRMED' &&
+                       isValidCustomerOrder(incoming(), userId);
+
+      allow update: if isAdmin() &&
+                       isValidId(userId) &&
+                       isValidId(orderId) &&
+                       isValidCustomerOrder(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+
+      allow delete: if false;
+    }
+
+    // Customer Favorites: Isolated per authenticated user
+    match /users/{userId}/favorites/{productId} {
+      allow get: if isSignedIn() && isValidId(userId) && isValidId(productId) && request.auth.uid == userId;
+      allow list: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(productId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll(['productId', 'createdAt']) &&
+                       incoming().keys().hasOnly(['productId', 'createdAt']) &&
+                       incoming().productId == productId &&
+                       isValidFavoriteItem(incoming());
+
+      allow update: if false;
+      allow delete: if isSignedIn() && isValidId(userId) && isValidId(productId) && request.auth.uid == userId;
+    }
+  }
+}

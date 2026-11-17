@@ -1,0 +1,6 @@
+{
+  "name": "Fresh Market",
+  "description": "Your online fresh grocery and organic marketplace app with smart AI recipes and real-time order tracking.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
