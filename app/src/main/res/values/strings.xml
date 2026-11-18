@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">تسوق من متجر الجمل
-    </string name="default_web_cl
+    <string name="app_name">تسوق من متجر الجمل</string>
+    <string name="default_web_client_id" translatable="false">://googleusercontent.com</string>
 </resources>
