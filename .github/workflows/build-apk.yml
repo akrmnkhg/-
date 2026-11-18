@@ -37,14 +37,13 @@ jobs:
             gradle assembleDebug
           fi
 
-      - name: Search for output files
-        run: find . -type f \( -name ".apk" -o -name ".aab" \)
+      - name: Copy APK to root
+        run: |
+          find . -type f -name "*.apk" -exec cp {} ./Fresh-Market-Customer.apk \;
+          ls -la
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Fresh-Market-Customer-APK
-          path: |
-            */.apk
-            */.aab
-          if-no-files-found: warn
+          path: Fresh-Market-Customer.apk
